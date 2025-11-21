@@ -1,5 +1,6 @@
 package game;
 
+import game.collision.CollisionChecker;
 import game.entity.PlayerEntity;
 import game.tile.TileManager;
 
@@ -15,7 +16,9 @@ public class GamePanel extends JPanel implements Runnable { //extending JPanel m
     public final int maxScreenRow = 12;
     public final int screenWidth = tileSize * maxScreenCol; //64 * 16 = 1024 screen pixel width
     public final int screenHeight = tileSize * maxScreenRow; // 64 * 12 = 768 screen pixel height
+    public TileManager tileManager = new TileManager(this);
 
+    public CollisionChecker collisionChecker = new CollisionChecker(this);
 
     //FPS
     int fps = 60;
@@ -24,7 +27,6 @@ public class GamePanel extends JPanel implements Runnable { //extending JPanel m
 
     private final PlayerEntity player = new PlayerEntity(this, keyH);
 
-    TileManager tileManager = new TileManager(this);
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));

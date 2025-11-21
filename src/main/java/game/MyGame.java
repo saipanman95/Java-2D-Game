@@ -12,7 +12,7 @@ public class MyGame {
         GamePanel gamePanel = new GamePanel();
         window.add(gamePanel);
         window.pack();
-        gamePanel.startGameGameThread();
+//        gamePanel.startGameGameThread();
         window.setTitle("2D Adventure"); // changing the name
         window.setLocationRelativeTo(null); // will display the window center of the screen.
         window.setVisible(true);          // make visible LAST

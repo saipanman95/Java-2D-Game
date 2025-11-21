@@ -6,7 +6,6 @@ import game.GamePanel;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +13,7 @@ public class TileManager {
 
     GamePanel gp;
     private final Map<TileType, BufferedImage> tileImages = new EnumMap<>(TileType.class);
-    Tile[][] mapTiles;
+    public Tile[][] mapTiles;
     FileLoader loader = new FileLoader();
 
     public TileManager(GamePanel gp) {

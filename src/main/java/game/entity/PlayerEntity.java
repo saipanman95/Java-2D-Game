@@ -3,6 +3,7 @@ package game.entity;
 import game.FileLoader;
 import game.GamePanel;
 import game.KeyHandler;
+import game.tile.Tile;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -10,110 +11,96 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PlayerEntity extends Entity {
-    public final GamePanel gp;
-    public final KeyHandler keyH;
 
-    private static final String PLAYER_DOWN_LEFT_STEP = "player/down-left-step.png";
-    private static final String PLAYER_DOWN_RIGHT_STEP = "player/down-right-step.png";
-    private static final String PLAYER_DOWN_STAND_STILL = "player/down-stand-still.png";
-    private static final String PLAYER_UP_RIGHT_STEP = "player/up-right-step.png";
-    private static final String PLAYER_UP_LEFT_STEP = "player/up-left-step.png";
-    private static final String PLAYER_UP_STAND_STILL = "player/up-stand-still.png";
-    private static final String PLAYER_LEFT_LEFT_STEP = "player/left-left-step.png";
-    private static final String PLAYER_LEFT_RIGHT_STEP = "player/left-right-step.png";
-    private static final String PLAYER_LEFT_STAND_STILL = "player/left-stand-still.png";
-    private static final String PLAYER_RIGHT_LEFT_STEP = "player/right-right-step.png";
-    private static final String PLAYER_RIGHT_RIGHT_STEP = "player/right-left-step.png";
-    private static final String PLAYER_RIGHT_STAND_STILL = "player/right-stand-still.png";
-
-    final Map<String, BufferedImage> playerImageMap = new HashMap<>();
+    private final GamePanel gp;
+    private final KeyHandler keyH;
+    private final Map<String, BufferedImage> playerImageMap = new HashMap<>();
 
     private int animIndex = 0;
-    private int animCounter = 0;     // counts game updates
+    private int animCounter = 0;
 
-    // health
-    private int health;
-    private int lives;
-
-    public PlayerEntity(GamePanel gamePanel, KeyHandler keyHandler) {
-        this.gp = gamePanel;
-        this.keyH = keyHandler;
+    public PlayerEntity(GamePanel gp, KeyHandler keyH) {
+        this.gp = gp;
+        this.keyH = keyH;
         setDefaultValues();
-        getPlayerImage();
+        loadPlayerImages();
     }
 
-    public void setDefaultValues() {
+    private void setDefaultValues() {
         x = 100;
         y = 100;
-        playerSpeed = 4;
+        speed = 4;
         direction = "down";
     }
 
-    public void getPlayerImage() {
+    private void loadPlayerImages() {
         FileLoader iml = new FileLoader();
-        playerImageMap.put("up", iml.loadImage(PLAYER_UP_STAND_STILL));
-        playerImageMap.put("up1", iml.loadImage(PLAYER_UP_RIGHT_STEP));
-        playerImageMap.put("up2", iml.loadImage(PLAYER_UP_LEFT_STEP));
-        playerImageMap.put("down", iml.loadImage(PLAYER_DOWN_STAND_STILL));
-        playerImageMap.put("down1", iml.loadImage(PLAYER_DOWN_RIGHT_STEP));
-        playerImageMap.put("down2", iml.loadImage(PLAYER_DOWN_LEFT_STEP));
-        playerImageMap.put("right", iml.loadImage(PLAYER_RIGHT_STAND_STILL));
-        playerImageMap.put("right1", iml.loadImage(PLAYER_RIGHT_RIGHT_STEP));
-        playerImageMap.put("right2", iml.loadImage(PLAYER_RIGHT_LEFT_STEP));
-        playerImageMap.put("left", iml.loadImage(PLAYER_LEFT_STAND_STILL));
-        playerImageMap.put("left1", iml.loadImage(PLAYER_LEFT_LEFT_STEP));
-        playerImageMap.put("left2", iml.loadImage(PLAYER_LEFT_RIGHT_STEP));
+        playerImageMap.put("up", iml.loadImage("player/up-stand-still.png"));
+        playerImageMap.put("up1", iml.loadImage("player/up-right-step.png"));
+        playerImageMap.put("up2", iml.loadImage("player/up-left-step.png"));
+        playerImageMap.put("down", iml.loadImage("player/down-stand-still.png"));
+        playerImageMap.put("down1", iml.loadImage("player/down-right-step.png"));
+        playerImageMap.put("down2", iml.loadImage("player/down-left-step.png"));
+        playerImageMap.put("left", iml.loadImage("player/left-stand-still.png"));
+        playerImageMap.put("left1", iml.loadImage("player/left-left-step.png"));
+        playerImageMap.put("left2", iml.loadImage("player/left-right-step.png"));
+        playerImageMap.put("right", iml.loadImage("player/right-stand-still.png"));
+        playerImageMap.put("right1", iml.loadImage("player/right-right-step.png"));
+        playerImageMap.put("right2", iml.loadImage("player/right-left-step.png"));
     }
 
+    @Override
     public void update() {
-        //default state of image
+        int dx = 0, dy = 0;
         boolean moving = false;
 
-        if (keyH.upPressed) {
-            y -= playerSpeed;
-            moving = true;
-            direction = "up";
-        }
-        if (keyH.downPressed) {
-            y += playerSpeed;
-            moving = true;
-            direction = "down";
-        }
-        if (keyH.leftPressed) {
-            x -= playerSpeed;
-            moving = true;
-            direction = "left";
-        }
-        if (keyH.rightPressed) {
-            x += playerSpeed;
-            moving = true;
-            direction = "right";
+        if (keyH.upPressed)    { dy -= speed; direction = "up";    moving = true; }
+        if (keyH.downPressed)  { dy += speed; direction = "down";  moving = true; }
+        if (keyH.leftPressed)  { dx -= speed; direction = "left";  moving = true; }
+        if (keyH.rightPressed) { dx += speed; direction = "right"; moving = true; }
+
+        if (moving) {
+            // Y first
+            if (!gp.collisionChecker.willCollide(this, 0, dy)) y += dy;
+            // then X
+            if (!gp.collisionChecker.willCollide(this, dx, 0)) x += dx;
         }
 
-        // keep player on screen (optional clamp)
-        x = Math.max(0, Math.min(x, gp.screenWidth - gp.tileSize));
+        x = Math.max(0, Math.min(x, gp.screenWidth  - gp.tileSize));
         y = Math.max(0, Math.min(y, gp.screenHeight - gp.tileSize));
 
-        /*
-          moving is boolean variable that is set if key press occurs
-          this will cause the underlying PlayerEntity object to change
-          motion of the image by swapping which one will be displayed
-          when player.currentFrame() is called in the paintComponent(...)
-          method.
-         */
         tick(moving);
     }
 
-    public void draw(Graphics2D g2) {
-        // keep pixel art crisp when scaled
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-        BufferedImage currentImageFrame = currentFrame();
-        g2.drawImage(currentImageFrame, x, y, gp.tileSize, gp.tileSize, null);
 
+    /** Checks for collisions with solid or dangerous tiles. */
+    private boolean willCollide(int dx, int dy) {
+        Rectangle futureBounds = getBounds();
+        futureBounds.translate(dx, dy);
+
+        int leftCol = futureBounds.x / gp.tileSize;
+        int rightCol = (futureBounds.x + futureBounds.width - 1) / gp.tileSize;
+        int topRow = futureBounds.y / gp.tileSize;
+        int bottomRow = (futureBounds.y + futureBounds.height - 1) / gp.tileSize;
+
+        for (int row = topRow; row <= bottomRow; row++) {
+            for (int col = leftCol; col <= rightCol; col++) {
+                Tile tile = gp.tileManager.mapTiles[col][row];
+                if (tile == null) continue;
+
+                if (tile.isSolid()) {
+                    return true;
+                }
+                if (tile.isDangerous()) {
+                    takeDamage(tile.getDamage());
+                }
+            }
+        }
+
+        return false;
     }
 
-    // Example getter
-    public void tick(boolean moving) {
+    private void tick(boolean moving) {
         if (moving) {
             if (++animCounter >= 12) {
                 animCounter = 0;
@@ -122,15 +109,17 @@ public class PlayerEntity extends Entity {
         }
     }
 
-    public BufferedImage currentFrame() {
-        if (animIndex == 0) {
-            return playerImageMap.get(direction);
-        } else if (animIndex == 1) {
-            return playerImageMap.get(direction + animIndex);
-        } else if (animIndex == 2) {
-            return playerImageMap.get(direction + animIndex);
-        } else {
-            return playerImageMap.get(direction);
-        }
+    private BufferedImage currentFrame() {
+        return playerImageMap.getOrDefault(direction + animIndex, playerImageMap.get(direction));
+    }
+
+    @Override
+    public void draw(Graphics2D g2) {
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        g2.drawImage(currentFrame(), x, y, gp.tileSize, gp.tileSize, null);
+
+        // Optional: draw hitbox for debugging
+        // g2.setColor(Color.RED);
+        // g2.draw(getBounds());
     }
 }

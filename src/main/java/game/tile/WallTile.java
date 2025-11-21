@@ -20,7 +20,7 @@ public class WallTile extends Tile implements Collidable, TileDetails {
 
     @Override
     public boolean isSolid() {
-        return false;
+        return true;
     }
 
     @Override
