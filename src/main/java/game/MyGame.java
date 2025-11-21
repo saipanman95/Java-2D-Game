@@ -17,6 +17,6 @@ public class MyGame {
         window.setLocationRelativeTo(null); // will display the window center of the screen.
         window.setVisible(true);          // make visible LAST
         gamePanel.requestFocusInWindow();        // ensure GamePanel gets keyboard focus
-        gamePanel.startGameGameThread();
+        gamePanel.startGameThread();
     }
 }
